@@ -37,15 +37,13 @@ Unity场景层级快照工具，支持导出场景层级结构为XML格式，包
 插件安装后，可以通过以下菜单访问功能：
 
 1. **导出所有已加载场景 (Export All Loaded Scenes)**: 导出所有已加载场景和DontDestroyOnLoad对象
-2. **导出指定场景 (Export Specific Scene)**: 选择性导出特定场景的层级结构
-   - 支持输入场景名称
-   - 支持从已加载场景列表中选择
-   - 始终包含DontDestroyOnLoad对象
-3. **导出DontDestroyOnLoad对象 (Export DontDestroyOnLoad)**: 仅导出DontDestroyOnLoad对象
-4. **打开导出文件夹 (Open Export Folder)**: 打开导出文件所在目录
-5. **设置 (Settings)**: 配置导出选项
+2. **导出DontDestroyOnLoad对象 (Export DontDestroyOnLoad)**: 仅导出DontDestroyOnLoad对象
+3. **打开导出文件夹 (Open Export Folder)**: 打开导出文件所在目录
+4. **设置 (Settings)**: 配置导出选项
 
 ### 通过代码调用
+
+编辑器菜单提供基本的导出功能。如需导出指定场景，请使用以下API：
 
 ```csharp
 using EzGame.SnapShoot;
@@ -204,7 +202,6 @@ HierarchySnapShoot/
 ### 编辑器菜单
 
 - `SnapShootMenuItems.ExportCurrentSceneHierarchy()`: 导出当前所有已加载场景
-- `SnapShootMenuItems.ExportSpecificSceneHierarchy()`: 导出指定场景（提供选择界面）
 - `SnapShootMenuItems.ExportDontDestroyOnLoadHierarchy()`: 导出DontDestroyOnLoad对象
 - `SnapShootMenuItems.OpenExportFolder()`: 打开导出文件夹
 

@@ -46,11 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 支持自定义导出选项: `GetSpecificSceneHierarchyToXML(string sceneName, ExportOptions options)`
   - **新增XML字符串API**: `GetSpecificSceneHierarchyToXMLString()` 直接返回XML字符串
 - **场景名称查询**: 新增 `GetLoadedSceneNames()` 方法获取所有已加载场景名称
-- **编辑器菜单增强**: 新增"导出指定场景 (Export Specific Scene)"菜单项
-  - 支持输入场景名称的对话框
-  - 支持从已加载场景列表中选择
-  - 支持单个场景导出和批量导出
-  - 显示导出结果摘要
+- **编辑器菜单简化**: 编辑器菜单专注于基本导出功能
+  - 导出所有已加载场景
+  - 导出DontDestroyOnLoad对象
+  - 指定场景导出功能仅通过API提供
 - **中英文菜单**: 所有菜单项采用"中文 (English)"格式，更加友好
 - **DontDestroyOnLoad集成**: 所有导出模式都自动包含DontDestroyOnLoad对象
 - **完整的单元测试**: 为所有新方法添加了完整的测试覆盖
