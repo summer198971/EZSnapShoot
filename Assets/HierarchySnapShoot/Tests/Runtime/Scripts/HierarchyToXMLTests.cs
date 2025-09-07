@@ -209,5 +209,64 @@ namespace EzGame.SnapShoot.Tests
             Assert.IsFalse(xmlString.Contains("<Rotation"), "Should not contain Rotation elements when IncludeTransform is false");
             Assert.IsFalse(xmlString.Contains("<Scale"), "Should not contain Scale elements when IncludeTransform is false");
         }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXMLString_WithValidSceneName_ShouldReturnValidXMLString()
+        {
+            // Arrange
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            
+            // Act
+            string xmlString = HierarchyToXML.GetSpecificSceneHierarchyToXMLString(currentSceneName);
+            
+            // Assert
+            Assert.IsNotNull(xmlString);
+            Assert.IsTrue(xmlString.Contains("<Hierarchy"));
+            Assert.IsTrue(xmlString.Contains("</Hierarchy>"));
+            Assert.IsTrue(xmlString.Contains($"targetScene=\"{currentSceneName}\""));
+            Assert.IsTrue(xmlString.Contains("DontDestroyOnLoad"), "Should always include DontDestroyOnLoad scene");
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXMLString_WithInvalidSceneName_ShouldReturnNull()
+        {
+            // Act
+            string xmlString = HierarchyToXML.GetSpecificSceneHierarchyToXMLString("NonExistentScene");
+            
+            // Assert
+            Assert.IsNull(xmlString);
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXMLString_WithDontDestroyOnLoad_ShouldReturnValidXMLString()
+        {
+            // Act
+            string xmlString = HierarchyToXML.GetSpecificSceneHierarchyToXMLString("DontDestroyOnLoad");
+            
+            // Assert
+            Assert.IsNotNull(xmlString);
+            Assert.IsTrue(xmlString.Contains("<Hierarchy"));
+            Assert.IsTrue(xmlString.Contains("</Hierarchy>"));
+            Assert.IsTrue(xmlString.Contains("targetScene=\"DontDestroyOnLoad\""));
+            Assert.IsTrue(xmlString.Contains("name=\"DontDestroyOnLoad\""));
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXML_ShouldAlwaysIncludeDontDestroyOnLoad()
+        {
+            // Arrange
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            
+            // Act
+            var xmlDoc = HierarchyToXML.GetSpecificSceneHierarchyToXML(currentSceneName);
+            
+            // Assert
+            Assert.IsNotNull(xmlDoc);
+            string xmlString = xmlDoc.OuterXml;
+            
+            // 验证包含指定场景和DontDestroyOnLoad场景
+            Assert.IsTrue(xmlString.Contains($"name=\"{currentSceneName}\""), "Should contain the specified scene");
+            Assert.IsTrue(xmlString.Contains("name=\"DontDestroyOnLoad\""), "Should always include DontDestroyOnLoad scene");
+        }
     }
 }

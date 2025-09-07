@@ -202,7 +202,7 @@ namespace EzGame.SnapShoot
         }
         
         /// <summary>
-        /// 获取指定场景的层级结构的XML文档（带配置选项）
+        /// 获取指定场景的层级结构的XML文档（包含DontDestroyOnLoad对象，带配置选项）
         /// </summary>
         /// <param name="sceneName">场景名称</param>
         /// <param name="options">导出配置选项</param>
@@ -211,36 +211,7 @@ namespace EzGame.SnapShoot
         {
             try
             {
-                Debug.Log("[EzGame.SnapShoot] " + $"开始导出指定场景 '{sceneName}' 的层级结构");
-                
-                // 查找指定场景
-                Scene targetScene = default;
-                bool sceneFound = false;
-                
-                // 检查是否是DontDestroyOnLoad场景
-                if (sceneName == "DontDestroyOnLoad")
-                {
-                    return GetDontDestroyOnLoadHierarchyToXML(options);
-                }
-                
-                // 在所有已加载的场景中查找
-                int sceneCount = SceneManager.sceneCount;
-                for (int i = 0; i < sceneCount; i++)
-                {
-                    Scene scene = SceneManager.GetSceneAt(i);
-                    if (scene.name == sceneName && scene.isLoaded)
-                    {
-                        targetScene = scene;
-                        sceneFound = true;
-                        break;
-                    }
-                }
-                
-                if (!sceneFound)
-                {
-                    Debug.LogWarning("[EzGame.SnapShoot] " + $"未找到已加载的场景: '{sceneName}'");
-                    return null;
-                }
+                Debug.Log("[EzGame.SnapShoot] " + $"开始导出指定场景 '{sceneName}' 的层级结构（包含DontDestroyOnLoad）");
                 
                 // 创建XmlDocument对象
                 XmlDocument xmlDoc = new XmlDocument();
@@ -252,24 +223,84 @@ namespace EzGame.SnapShoot
                 root.SetAttribute("targetScene", sceneName);
                 xmlDoc.AppendChild(root);
 
-                // 创建场景元素
-                XmlElement sceneElement = xmlDoc.CreateElement("Scene");
-                sceneElement.SetAttribute("name", targetScene.name);
-                sceneElement.SetAttribute("active", (targetScene == SceneManager.GetActiveScene()).ToString());
-                sceneElement.SetAttribute("path", targetScene.path);
-                root.AppendChild(sceneElement);
+                // 查找并导出指定场景
+                bool sceneFound = false;
                 
-                // 获取场景的所有根对象
-                GameObject[] rootObjects = targetScene.GetRootGameObjects();
-                Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 包含 {rootObjects.Length} 个根对象");
-
-                // 遍历每个根对象
-                foreach (GameObject rootObject in rootObjects)
+                // 检查是否是DontDestroyOnLoad场景
+                if (sceneName == "DontDestroyOnLoad")
                 {
-                    AppendGameObject(sceneElement, rootObject, xmlDoc, options, 0);
+                    XmlElement dontDestroyElement = xmlDoc.CreateElement("Scene");
+                    dontDestroyElement.SetAttribute("name", "DontDestroyOnLoad");
+                    dontDestroyElement.SetAttribute("active", "true");
+                    dontDestroyElement.SetAttribute("path", "");
+                    root.AppendChild(dontDestroyElement);
+                    
+                    GameObject[] dontDestroyObjects = getDontDestroyOnLoadGameObjects();
+                    Debug.Log("[EzGame.SnapShoot] " + $"DontDestroyOnLoad 包含 {dontDestroyObjects.Length} 个对象");
+                    
+                    foreach (GameObject rootObject in dontDestroyObjects)
+                    {
+                        AppendGameObject(dontDestroyElement, rootObject, xmlDoc, options, 0);
+                    }
+                    sceneFound = true;
+                }
+                else
+                {
+                    // 在所有已加载的场景中查找
+                    int sceneCount = SceneManager.sceneCount;
+                    for (int i = 0; i < sceneCount; i++)
+                    {
+                        Scene scene = SceneManager.GetSceneAt(i);
+                        if (scene.name == sceneName && scene.isLoaded)
+                        {
+                            // 创建指定场景元素
+                            XmlElement sceneElement = xmlDoc.CreateElement("Scene");
+                            sceneElement.SetAttribute("name", scene.name);
+                            sceneElement.SetAttribute("active", (scene == SceneManager.GetActiveScene()).ToString());
+                            sceneElement.SetAttribute("path", scene.path);
+                            root.AppendChild(sceneElement);
+                            
+                            // 获取场景的所有根对象
+                            GameObject[] rootObjects = scene.GetRootGameObjects();
+                            Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 包含 {rootObjects.Length} 个根对象");
+
+                            // 遍历每个根对象
+                            foreach (GameObject rootObject in rootObjects)
+                            {
+                                AppendGameObject(sceneElement, rootObject, xmlDoc, options, 0);
+                            }
+                            
+                            sceneFound = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!sceneFound)
+                {
+                    Debug.LogWarning("[EzGame.SnapShoot] " + $"未找到已加载的场景: '{sceneName}'");
+                    return null;
+                }
+                
+                // 始终添加DontDestroyOnLoad场景（除非指定场景本身就是DontDestroyOnLoad）
+                if (sceneName != "DontDestroyOnLoad")
+                {
+                    XmlElement dontDestroyElement = xmlDoc.CreateElement("Scene");
+                    dontDestroyElement.SetAttribute("name", "DontDestroyOnLoad");
+                    dontDestroyElement.SetAttribute("active", "true");
+                    dontDestroyElement.SetAttribute("path", "");
+                    root.AppendChild(dontDestroyElement);
+                    
+                    GameObject[] dontDestroyObjects = getDontDestroyOnLoadGameObjects();
+                    Debug.Log("[EzGame.SnapShoot] " + $"DontDestroyOnLoad 包含 {dontDestroyObjects.Length} 个对象");
+                    
+                    foreach (GameObject rootObject in dontDestroyObjects)
+                    {
+                        AppendGameObject(dontDestroyElement, rootObject, xmlDoc, options, 0);
+                    }
                 }
 
-                Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 的层级结构导出完成");
+                Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 的层级结构导出完成（包含DontDestroyOnLoad）");
                 return xmlDoc;
             }
             catch (System.Exception ex)
@@ -348,6 +379,135 @@ namespace EzGame.SnapShoot
             }
             
             return sceneNames.ToArray();
+        }
+        
+        /// <summary>
+        /// 获取指定场景的层级结构XML字符串（包含DontDestroyOnLoad对象）
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        /// <returns>XML字符串，如果场景未找到则返回null</returns>
+        public static string GetSpecificSceneHierarchyToXMLString(string sceneName)
+        {
+            return GetSpecificSceneHierarchyToXMLString(sceneName, ExportOptions.Default);
+        }
+        
+        /// <summary>
+        /// 获取指定场景的层级结构XML字符串（包含DontDestroyOnLoad对象，带配置选项）
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        /// <param name="options">导出配置选项</param>
+        /// <returns>XML字符串，如果场景未找到则返回null</returns>
+        public static string GetSpecificSceneHierarchyToXMLString(string sceneName, ExportOptions options)
+        {
+            try
+            {
+                Debug.Log("[EzGame.SnapShoot] " + $"开始导出指定场景 '{sceneName}' 的层级结构（包含DontDestroyOnLoad）");
+                
+                // 创建XmlDocument对象
+                XmlDocument xmlDoc = new XmlDocument();
+
+                // 创建根元素
+                XmlElement root = xmlDoc.CreateElement("Hierarchy");
+                root.SetAttribute("exportTime", System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                root.SetAttribute("unityVersion", Application.unityVersion);
+                root.SetAttribute("targetScene", sceneName);
+                xmlDoc.AppendChild(root);
+
+                // 查找并导出指定场景
+                bool sceneFound = false;
+                
+                // 检查是否是DontDestroyOnLoad场景
+                if (sceneName == "DontDestroyOnLoad")
+                {
+                    XmlElement dontDestroyElement = xmlDoc.CreateElement("Scene");
+                    dontDestroyElement.SetAttribute("name", "DontDestroyOnLoad");
+                    dontDestroyElement.SetAttribute("active", "true");
+                    dontDestroyElement.SetAttribute("path", "");
+                    root.AppendChild(dontDestroyElement);
+                    
+                    GameObject[] dontDestroyObjects = getDontDestroyOnLoadGameObjects();
+                    Debug.Log("[EzGame.SnapShoot] " + $"DontDestroyOnLoad 包含 {dontDestroyObjects.Length} 个对象");
+                    
+                    foreach (GameObject rootObject in dontDestroyObjects)
+                    {
+                        AppendGameObject(dontDestroyElement, rootObject, xmlDoc, options, 0);
+                    }
+                    sceneFound = true;
+                }
+                else
+                {
+                    // 在所有已加载的场景中查找
+                    int sceneCount = SceneManager.sceneCount;
+                    for (int i = 0; i < sceneCount; i++)
+                    {
+                        Scene scene = SceneManager.GetSceneAt(i);
+                        if (scene.name == sceneName && scene.isLoaded)
+                        {
+                            // 创建指定场景元素
+                            XmlElement sceneElement = xmlDoc.CreateElement("Scene");
+                            sceneElement.SetAttribute("name", scene.name);
+                            sceneElement.SetAttribute("active", (scene == SceneManager.GetActiveScene()).ToString());
+                            sceneElement.SetAttribute("path", scene.path);
+                            root.AppendChild(sceneElement);
+                            
+                            // 获取场景的所有根对象
+                            GameObject[] rootObjects = scene.GetRootGameObjects();
+                            Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 包含 {rootObjects.Length} 个根对象");
+
+                            // 遍历每个根对象
+                            foreach (GameObject rootObject in rootObjects)
+                            {
+                                AppendGameObject(sceneElement, rootObject, xmlDoc, options, 0);
+                            }
+                            
+                            sceneFound = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!sceneFound)
+                {
+                    Debug.LogWarning("[EzGame.SnapShoot] " + $"未找到已加载的场景: '{sceneName}'");
+                    return null;
+                }
+                
+                // 始终添加DontDestroyOnLoad场景（除非指定场景本身就是DontDestroyOnLoad）
+                if (sceneName != "DontDestroyOnLoad")
+                {
+                    XmlElement dontDestroyElement = xmlDoc.CreateElement("Scene");
+                    dontDestroyElement.SetAttribute("name", "DontDestroyOnLoad");
+                    dontDestroyElement.SetAttribute("active", "true");
+                    dontDestroyElement.SetAttribute("path", "");
+                    root.AppendChild(dontDestroyElement);
+                    
+                    GameObject[] dontDestroyObjects = getDontDestroyOnLoadGameObjects();
+                    Debug.Log("[EzGame.SnapShoot] " + $"DontDestroyOnLoad 包含 {dontDestroyObjects.Length} 个对象");
+                    
+                    foreach (GameObject rootObject in dontDestroyObjects)
+                    {
+                        AppendGameObject(dontDestroyElement, rootObject, xmlDoc, options, 0);
+                    }
+                }
+
+                // 转换为字符串
+                using (var stringWriter = new StringWriter())
+                using (var xmlWriter = new System.Xml.XmlTextWriter(stringWriter))
+                {
+                    xmlWriter.Formatting = System.Xml.Formatting.Indented;
+                    xmlWriter.Indentation = 2;
+                    xmlDoc.Save(xmlWriter);
+                    
+                    string result = stringWriter.ToString();
+                    Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 的层级结构导出完成（包含DontDestroyOnLoad）");
+                    return result;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("[EzGame.SnapShoot] " + $"导出场景 '{sceneName}' 的层级结构时发生错误: {ex.Message}");
+                return null;
+            }
         }
 
         private static GameObject[] getDontDestroyOnLoadGameObjects()

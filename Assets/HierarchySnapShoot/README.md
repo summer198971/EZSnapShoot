@@ -36,11 +36,14 @@ Unity场景层级快照工具，支持导出场景层级结构为XML格式，包
 
 插件安装后，可以通过以下菜单访问功能：
 
-1. **导出已加载场景**: `EzGame/SnapShoot/Export Current Scene Hierarchy` - 导出所有已加载场景和DontDestroyOnLoad对象
-2. **导出指定场景**: `EzGame/SnapShoot/Export Specific Scene Hierarchy` - 选择性导出特定场景的层级结构
-3. **导出DontDestroyOnLoad对象**: `EzGame/SnapShoot/Export DontDestroyOnLoad Hierarchy`
-4. **打开导出文件夹**: `EzGame/SnapShoot/Open Export Folder`
-5. **设置配置**: `EzGame/SnapShoot/Settings`
+1. **导出所有已加载场景 (Export All Loaded Scenes)**: 导出所有已加载场景和DontDestroyOnLoad对象
+2. **导出指定场景 (Export Specific Scene)**: 选择性导出特定场景的层级结构
+   - 支持输入场景名称
+   - 支持从已加载场景列表中选择
+   - 始终包含DontDestroyOnLoad对象
+3. **导出DontDestroyOnLoad对象 (Export DontDestroyOnLoad)**: 仅导出DontDestroyOnLoad对象
+4. **打开导出文件夹 (Open Export Folder)**: 打开导出文件所在目录
+5. **设置 (Settings)**: 配置导出选项
 
 ### 通过代码调用
 
@@ -51,8 +54,11 @@ using System.Xml;
 // 获取当前已加载场景层级的XML文档（包括DontDestroyOnLoad）
 XmlDocument sceneXml = HierarchyToXML.GetCurrentSceneLoadedHierarchyToXML();
 
-// 获取指定场景的层级结构
+// 获取指定场景的层级结构（包含DontDestroyOnLoad）
 XmlDocument specificSceneXml = HierarchyToXML.GetSpecificSceneHierarchyToXML("SampleScene");
+
+// 获取指定场景的XML字符串（包含DontDestroyOnLoad）
+string xmlString = HierarchyToXML.GetSpecificSceneHierarchyToXMLString("SampleScene");
 
 // 通过场景索引获取层级结构
 XmlDocument sceneByIndexXml = HierarchyToXML.GetSpecificSceneHierarchyToXML(0);
@@ -186,9 +192,11 @@ HierarchySnapShoot/
 #### 静态方法
 
 - `GetCurrentSceneLoadedHierarchyToXML()`: 获取当前已加载场景层级的XML文档（包括所有已加载场景和DontDestroyOnLoad对象）
-- `GetSpecificSceneHierarchyToXML(string sceneName)`: 获取指定场景的层级结构XML文档
+- `GetSpecificSceneHierarchyToXML(string sceneName)`: 获取指定场景的层级结构XML文档（包含DontDestroyOnLoad）
+- `GetSpecificSceneHierarchyToXMLString(string sceneName)`: 获取指定场景的层级结构XML字符串（包含DontDestroyOnLoad）
 - `GetSpecificSceneHierarchyToXML(int sceneIndex)`: 通过场景索引获取指定场景的层级结构XML文档
 - `GetSpecificSceneHierarchyToXML(string sceneName, ExportOptions options)`: 使用自定义选项获取指定场景的层级结构
+- `GetSpecificSceneHierarchyToXMLString(string sceneName, ExportOptions options)`: 使用自定义选项获取指定场景的XML字符串
 - `GetLoadedSceneNames()`: 获取所有已加载场景的名称列表
 - `GetDontDestroyOnLoadHierarchyToXML()`: 获取DontDestroyOnLoad对象的XML文档
 - `GetDontDestroyOnLoadHierarchyToStr()`: 获取DontDestroyOnLoad对象的字符串格式

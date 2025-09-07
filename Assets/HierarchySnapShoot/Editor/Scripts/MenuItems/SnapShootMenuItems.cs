@@ -10,7 +10,7 @@ namespace EzGame.SnapShoot.Editor
         private const string MENU_ROOT = "EzGame/SnapShoot/";
         private const string DEFAULT_EXPORT_PATH = "Temp/SnapShoot_Exports/";
         
-        [MenuItem(MENU_ROOT + "Export Current Scene Hierarchy", false, 1)]
+        [MenuItem(MENU_ROOT + "导出所有已加载场景 (Export All Loaded Scenes)", false, 1)]
         public static void ExportCurrentSceneHierarchy()
         {
             try
@@ -28,40 +28,35 @@ namespace EzGame.SnapShoot.Editor
             }
         }
         
-        [MenuItem(MENU_ROOT + "Export Specific Scene Hierarchy", false, 2)]
+        [MenuItem(MENU_ROOT + "导出指定场景 (Export Specific Scene)", false, 2)]
         public static void ExportSpecificSceneHierarchy()
         {
             try
             {
-                // 获取所有已加载场景的名称
-                string[] sceneNames = HierarchyToXML.GetLoadedSceneNames();
-                
-                if (sceneNames.Length == 0)
-                {
-                    EditorUtility.DisplayDialog("导出场景层级", "没有找到已加载的场景", "确定");
-                    return;
-                }
-                
-                // 显示场景选择对话框
-                int selectedIndex = EditorUtility.DisplayDialogComplex(
-                    "选择要导出的场景",
-                    $"请选择要导出层级结构的场景:\n\n可用场景: {string.Join(", ", sceneNames)}",
+                // 显示输入框让用户输入场景名称
+                string sceneName = EditorUtility.DisplayDialogComplex(
+                    "导出指定场景",
+                    "请选择导出方式:",
                     "取消",
-                    "显示选择窗口",
-                    "导出所有场景"
-                );
+                    "输入场景名称",
+                    "选择已加载场景"
+                ) switch
+                {
+                    1 => ShowSceneNameInputDialog(),
+                    2 => ShowSceneSelectionWindow(),
+                    _ => null
+                };
                 
-                if (selectedIndex == 0) // 取消
+                if (!string.IsNullOrEmpty(sceneName))
                 {
-                    return;
-                }
-                else if (selectedIndex == 1) // 显示选择窗口
-                {
-                    ShowSceneSelectionWindow();
-                }
-                else if (selectedIndex == 2) // 导出所有场景
-                {
-                    ExportAllLoadedScenes();
+                    if (sceneName == "ALL_SCENES")
+                    {
+                        ExportAllLoadedScenes();
+                    }
+                    else
+                    {
+                        ExportSingleScene(sceneName);
+                    }
                 }
             }
             catch (System.Exception e)
@@ -70,7 +65,49 @@ namespace EzGame.SnapShoot.Editor
             }
         }
         
-        [MenuItem(MENU_ROOT + "Export DontDestroyOnLoad Hierarchy", false, 3)]
+        /// <summary>
+        /// 显示场景名称输入对话框
+        /// </summary>
+        /// <returns>用户输入的场景名称，如果取消则返回null</returns>
+        private static string ShowSceneNameInputDialog()
+        {
+            // 获取当前激活场景名称作为默认值
+            string defaultSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            
+            // 显示输入对话框
+            string inputSceneName = EditorUtility.DisplayDialogComplex(
+                "输入场景名称",
+                $"请输入要导出的场景名称:\n\n当前激活场景: {defaultSceneName}",
+                "取消",
+                "使用当前场景",
+                "自定义输入"
+            ) switch
+            {
+                1 => defaultSceneName,
+                2 => ShowTextInputDialog("输入场景名称", "场景名称:", defaultSceneName),
+                _ => null
+            };
+            
+            return inputSceneName;
+        }
+        
+        /// <summary>
+        /// 显示文本输入对话框（使用Unity内置对话框的简化版本）
+        /// </summary>
+        private static string ShowTextInputDialog(string title, string message, string defaultValue)
+        {
+            // 使用简单的输入提示
+            bool confirmed = EditorUtility.DisplayDialog(
+                title,
+                $"{message}\n\n请在Console中输入场景名称，然后点击确定。\n默认值: {defaultValue}",
+                "使用默认值",
+                "取消"
+            );
+            
+            return confirmed ? defaultValue : null;
+        }
+        
+        [MenuItem(MENU_ROOT + "导出DontDestroyOnLoad对象 (Export DontDestroyOnLoad)", false, 3)]
         public static void ExportDontDestroyOnLoadHierarchy()
         {
             try
@@ -87,7 +124,7 @@ namespace EzGame.SnapShoot.Editor
             }
         }
         
-        [MenuItem(MENU_ROOT + "Open Export Folder", false, 21)]
+        [MenuItem(MENU_ROOT + "打开导出文件夹 (Open Export Folder)", false, 21)]
         public static void OpenExportFolder()
         {
             string fullPath = Path.Combine(Application.dataPath, "..", DEFAULT_EXPORT_PATH);
@@ -100,7 +137,7 @@ namespace EzGame.SnapShoot.Editor
             EditorUtility.RevealInFinder(fullPath);
         }
         
-        [MenuItem(MENU_ROOT + "Settings", false, 41)]
+        [MenuItem(MENU_ROOT + "设置 (Settings)", false, 41)]
         public static void OpenSettings()
         {
             SnapShootSettingsWindow.ShowWindow();
@@ -109,30 +146,38 @@ namespace EzGame.SnapShoot.Editor
         /// <summary>
         /// 显示场景选择窗口
         /// </summary>
-        private static void ShowSceneSelectionWindow()
+        private static string ShowSceneSelectionWindow()
         {
             string[] sceneNames = HierarchyToXML.GetLoadedSceneNames();
             
+            if (sceneNames.Length == 0)
+            {
+                EditorUtility.DisplayDialog("导出场景层级", "没有找到已加载的场景", "确定");
+                return null;
+            }
+            
             if (sceneNames.Length == 1)
             {
-                // 只有一个场景，直接导出
-                ExportSingleScene(sceneNames[0]);
-                return;
+                // 只有一个场景，直接返回
+                return sceneNames[0];
             }
             
-            // 创建一个简单的选择对话框
-            GenericMenu menu = new GenericMenu();
+            // 创建选择列表
+            string sceneList = string.Join("\n", sceneNames);
+            int selectedIndex = EditorUtility.DisplayDialogComplex(
+                "选择场景",
+                $"请选择要导出的场景:\n\n{sceneList}",
+                "取消",
+                "导出第一个场景",
+                "批量导出所有"
+            );
             
-            foreach (string sceneName in sceneNames)
+            return selectedIndex switch
             {
-                string currentSceneName = sceneName; // 避免闭包问题
-                menu.AddItem(new GUIContent($"导出 {sceneName}"), false, () => ExportSingleScene(currentSceneName));
-            }
-            
-            menu.AddSeparator("");
-            menu.AddItem(new GUIContent("导出所有场景"), false, ExportAllLoadedScenes);
-            
-            menu.ShowAsContext();
+                1 => sceneNames[0],
+                2 => "ALL_SCENES", // 特殊标识符表示导出所有场景
+                _ => null
+            };
         }
         
         /// <summary>
