@@ -5,10 +5,13 @@ Unity场景层级快照工具，支持导出场景层级结构为XML格式，包
 ## 🚀 功能特性
 
 - **场景层级导出**: 一键导出当前场景的完整层级结构
+- **指定场景导出**: 选择性导出特定场景的层级结构，支持场景名称和索引
+- **批量场景导出**: 支持一次性导出所有已加载场景
 - **DontDestroyOnLoad支持**: 专门处理持久化对象的导出
 - **详细信息记录**: 记录GameObject的Transform、Component等详细信息
 - **材质信息**: 包含Renderer组件的材质和Shader信息
-- **编辑器集成**: 通过Unity菜单栏轻松访问功能
+- **灵活的导出选项**: 可自定义导出内容和深度限制
+- **编辑器集成**: 通过Unity菜单栏轻松访问功能，提供直观的场景选择界面
 - **设置面板**: 可自定义导出路径和其他选项
 - **完整测试**: 包含Runtime和Editor测试覆盖
 
@@ -33,10 +36,11 @@ Unity场景层级快照工具，支持导出场景层级结构为XML格式，包
 
 插件安装后，可以通过以下菜单访问功能：
 
-1. **导出当前场景**: `EzGame/SnapShoot/Export Current Scene Hierarchy`
-2. **导出DontDestroyOnLoad对象**: `EzGame/SnapShoot/Export DontDestroyOnLoad Hierarchy`
-3. **打开导出文件夹**: `EzGame/SnapShoot/Open Export Folder`
-4. **设置配置**: `EzGame/SnapShoot/Settings`
+1. **导出已加载场景**: `EzGame/SnapShoot/Export Current Scene Hierarchy` - 导出所有已加载场景和DontDestroyOnLoad对象
+2. **导出指定场景**: `EzGame/SnapShoot/Export Specific Scene Hierarchy` - 选择性导出特定场景的层级结构
+3. **导出DontDestroyOnLoad对象**: `EzGame/SnapShoot/Export DontDestroyOnLoad Hierarchy`
+4. **打开导出文件夹**: `EzGame/SnapShoot/Open Export Folder`
+5. **设置配置**: `EzGame/SnapShoot/Settings`
 
 ### 通过代码调用
 
@@ -44,8 +48,17 @@ Unity场景层级快照工具，支持导出场景层级结构为XML格式，包
 using EzGame.SnapShoot;
 using System.Xml;
 
-// 获取当前场景层级的XML文档
-XmlDocument sceneXml = HierarchyToXML.GetCurrentSceneHierarchyToXML();
+// 获取当前已加载场景层级的XML文档（包括DontDestroyOnLoad）
+XmlDocument sceneXml = HierarchyToXML.GetCurrentSceneLoadedHierarchyToXML();
+
+// 获取指定场景的层级结构
+XmlDocument specificSceneXml = HierarchyToXML.GetSpecificSceneHierarchyToXML("SampleScene");
+
+// 通过场景索引获取层级结构
+XmlDocument sceneByIndexXml = HierarchyToXML.GetSpecificSceneHierarchyToXML(0);
+
+// 获取所有已加载场景的名称
+string[] loadedScenes = HierarchyToXML.GetLoadedSceneNames();
 
 // 获取DontDestroyOnLoad对象的XML文档
 XmlDocument dontDestroyXml = HierarchyToXML.GetDontDestroyOnLoadHierarchyToXML();
@@ -53,6 +66,18 @@ XmlDocument dontDestroyXml = HierarchyToXML.GetDontDestroyOnLoadHierarchyToXML()
 // 获取字符串格式的层级信息
 var stringWriter = HierarchyToXML.GetDontDestroyOnLoadHierarchyToStr();
 string xmlString = stringWriter.ToString();
+
+// 使用自定义导出选项
+var options = new ExportOptions
+{
+    IncludeTransform = true,
+    IncludeComponents = true,
+    IncludeMaterials = false,
+    IncludeInactiveObjects = false,
+    IncludeChildObjects = true,
+    MaxDepth = 3
+};
+XmlDocument customXml = HierarchyToXML.GetSpecificSceneHierarchyToXML("SampleScene", options);
 ```
 
 ## 📋 XML输出格式
@@ -160,15 +185,42 @@ HierarchySnapShoot/
 
 #### 静态方法
 
-- `GetCurrentSceneHierarchyToXML()`: 获取当前场景层级的XML文档
+- `GetCurrentSceneLoadedHierarchyToXML()`: 获取当前已加载场景层级的XML文档（包括所有已加载场景和DontDestroyOnLoad对象）
+- `GetSpecificSceneHierarchyToXML(string sceneName)`: 获取指定场景的层级结构XML文档
+- `GetSpecificSceneHierarchyToXML(int sceneIndex)`: 通过场景索引获取指定场景的层级结构XML文档
+- `GetSpecificSceneHierarchyToXML(string sceneName, ExportOptions options)`: 使用自定义选项获取指定场景的层级结构
+- `GetLoadedSceneNames()`: 获取所有已加载场景的名称列表
 - `GetDontDestroyOnLoadHierarchyToXML()`: 获取DontDestroyOnLoad对象的XML文档
 - `GetDontDestroyOnLoadHierarchyToStr()`: 获取DontDestroyOnLoad对象的字符串格式
 
 ### 编辑器菜单
 
-- `SnapShootMenuItems.ExportCurrentSceneHierarchy()`: 导出当前场景
+- `SnapShootMenuItems.ExportCurrentSceneHierarchy()`: 导出当前所有已加载场景
+- `SnapShootMenuItems.ExportSpecificSceneHierarchy()`: 导出指定场景（提供选择界面）
 - `SnapShootMenuItems.ExportDontDestroyOnLoadHierarchy()`: 导出DontDestroyOnLoad对象
 - `SnapShootMenuItems.OpenExportFolder()`: 打开导出文件夹
+
+## 📁 导出文件管理
+
+### 默认导出路径
+- **默认路径**: `Temp/SnapShoot_Exports/`
+- **自定义路径**: 可通过设置面板或代码自定义
+
+### 版本控制友好
+导出的XML文件是临时生成的数据，**不应该**被版本控制系统跟踪：
+
+- ✅ **Git**: 已在 `.gitignore` 中配置忽略规则
+- ✅ **SVN**: 提供 `.svnignore` 文件模板
+- ✅ **Unity**: 使用 `Temp/` 目录，Unity自动忽略
+
+### 文件命名规则
+- `Hierarchy_{场景名}_{时间戳}.xml` - 完整场景导出
+- `Specific_{场景名}_{时间戳}.xml` - 指定场景导出
+- `Batch_{场景名}_{时间戳}.xml` - 批量导出
+- `DontDestroyOnLoad_{时间戳}.xml` - DontDestroyOnLoad对象
+
+### 重要提示
+⚠️ `Temp/` 目录下的文件在Unity重启时可能被清理，建议及时处理导出数据
 
 ## 🐛 已知问题
 

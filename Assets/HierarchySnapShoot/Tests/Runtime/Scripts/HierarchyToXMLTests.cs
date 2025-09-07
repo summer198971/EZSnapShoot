@@ -30,10 +30,10 @@ namespace EzGame.SnapShoot.Tests
         }
         
         [Test]
-        public void GetCurrentSceneHierarchyToXML_ShouldReturnValidXML()
+        public void GetCurrentSceneLoadedHierarchyToXML_ShouldReturnValidXML()
         {
             // Act
-            var xmlDoc = HierarchyToXML.GetCurrentSceneHierarchyToXML();
+            var xmlDoc = HierarchyToXML.GetCurrentSceneLoadedHierarchyToXML();
             
             // Assert
             Assert.IsNotNull(xmlDoc);
@@ -73,7 +73,7 @@ namespace EzGame.SnapShoot.Tests
             yield return null;
             
             // Act
-            var xmlDoc = HierarchyToXML.GetCurrentSceneHierarchyToXML();
+            var xmlDoc = HierarchyToXML.GetCurrentSceneLoadedHierarchyToXML();
             string xmlString = xmlDoc.OuterXml;
             
             // Assert
@@ -84,7 +84,7 @@ namespace EzGame.SnapShoot.Tests
         public void XMLDocument_ShouldContainSceneElement()
         {
             // Act
-            var xmlDoc = HierarchyToXML.GetCurrentSceneHierarchyToXML();
+            var xmlDoc = HierarchyToXML.GetCurrentSceneLoadedHierarchyToXML();
             var sceneElements = xmlDoc.GetElementsByTagName("Scene");
             
             // Assert
@@ -95,11 +95,119 @@ namespace EzGame.SnapShoot.Tests
         public void XMLDocument_ShouldContainDontDestroyOnLoadScene()
         {
             // Act
-            var xmlDoc = HierarchyToXML.GetCurrentSceneHierarchyToXML();
+            var xmlDoc = HierarchyToXML.GetCurrentSceneLoadedHierarchyToXML();
             string xmlString = xmlDoc.OuterXml;
             
             // Assert
             Assert.IsTrue(xmlString.Contains("DontDestroyOnLoad"), "XML should contain DontDestroyOnLoad scene");
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXML_WithValidSceneName_ShouldReturnValidXML()
+        {
+            // Arrange
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            
+            // Act
+            var xmlDoc = HierarchyToXML.GetSpecificSceneHierarchyToXML(currentSceneName);
+            
+            // Assert
+            Assert.IsNotNull(xmlDoc);
+            Assert.IsNotNull(xmlDoc.DocumentElement);
+            Assert.AreEqual("Hierarchy", xmlDoc.DocumentElement.Name);
+            
+            // 验证包含目标场景属性
+            Assert.AreEqual(currentSceneName, xmlDoc.DocumentElement.GetAttribute("targetScene"));
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXML_WithInvalidSceneName_ShouldReturnNull()
+        {
+            // Act
+            var xmlDoc = HierarchyToXML.GetSpecificSceneHierarchyToXML("NonExistentScene");
+            
+            // Assert
+            Assert.IsNull(xmlDoc);
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXML_WithDontDestroyOnLoad_ShouldReturnValidXML()
+        {
+            // Act
+            var xmlDoc = HierarchyToXML.GetSpecificSceneHierarchyToXML("DontDestroyOnLoad");
+            
+            // Assert
+            Assert.IsNotNull(xmlDoc);
+            Assert.IsNotNull(xmlDoc.DocumentElement);
+            Assert.AreEqual("Hierarchy", xmlDoc.DocumentElement.Name);
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXML_WithSceneIndex_ShouldReturnValidXML()
+        {
+            // Arrange
+            int activeSceneIndex = 0; // 通常活动场景的索引是0
+            
+            // Act
+            var xmlDoc = HierarchyToXML.GetSpecificSceneHierarchyToXML(activeSceneIndex);
+            
+            // Assert
+            Assert.IsNotNull(xmlDoc);
+            Assert.IsNotNull(xmlDoc.DocumentElement);
+            Assert.AreEqual("Hierarchy", xmlDoc.DocumentElement.Name);
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXML_WithInvalidSceneIndex_ShouldReturnNull()
+        {
+            // Act
+            var xmlDoc = HierarchyToXML.GetSpecificSceneHierarchyToXML(999);
+            
+            // Assert
+            Assert.IsNull(xmlDoc);
+        }
+        
+        [Test]
+        public void GetLoadedSceneNames_ShouldReturnNonEmptyArray()
+        {
+            // Act
+            string[] sceneNames = HierarchyToXML.GetLoadedSceneNames();
+            
+            // Assert
+            Assert.IsNotNull(sceneNames);
+            Assert.IsTrue(sceneNames.Length > 0, "Should have at least one loaded scene");
+            
+            // 验证包含当前活动场景
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            Assert.Contains(currentSceneName, sceneNames);
+        }
+        
+        [Test]
+        public void GetSpecificSceneHierarchyToXML_WithOptions_ShouldRespectOptions()
+        {
+            // Arrange
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            var options = new ExportOptions
+            {
+                IncludeTransform = false,
+                IncludeComponents = false,
+                IncludeMaterials = false,
+                IncludeInactiveObjects = false,
+                IncludeChildObjects = true,
+                MaxDepth = 1
+            };
+            
+            // Act
+            var xmlDoc = HierarchyToXML.GetSpecificSceneHierarchyToXML(currentSceneName, options);
+            
+            // Assert
+            Assert.IsNotNull(xmlDoc);
+            string xmlString = xmlDoc.OuterXml;
+            
+            // 验证不包含Transform信息（因为IncludeTransform = false）
+            Assert.IsFalse(xmlString.Contains("<Position"), "Should not contain Position elements when IncludeTransform is false");
+            Assert.IsFalse(xmlString.Contains("<Rotation"), "Should not contain Rotation elements when IncludeTransform is false");
+            Assert.IsFalse(xmlString.Contains("<Scale"), "Should not contain Scale elements when IncludeTransform is false");
         }
     }
 }

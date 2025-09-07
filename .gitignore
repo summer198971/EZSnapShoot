@@ -102,8 +102,24 @@ InitTestScene*.unity*
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
 # EZ SnapShoot specific ignores
+# SnapShoot导出文件（临时数据，不需要版本控制）
+/Temp/SnapShoot_Exports/
+/Temp/MyCustomExports/
+/Temp/Test_SnapShoot_Exports/
+# 如果用户自定义了Assets下的导出路径，也忽略这些文件
 /Assets/SnapShoot_Exports/
 /Assets/Test_SnapShoot_Exports/
+/Assets/MyCustomExports/
+# 任何以SnapShoot开头的导出目录
+**/SnapShoot_Exports*/
+**/MyCustomExports*/
+# SnapShoot导出的XML文件
+Hierarchy_*.xml
+Scene_*.xml
+Specific_*.xml
+Batch_*.xml
+ByIndex_*.xml
+DontDestroyOnLoad_*.xml
 
 # OS generated files
 .DS_Store

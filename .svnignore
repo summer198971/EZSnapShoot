@@ -1,0 +1,27 @@
+# SVN ignore rules for EZ SnapShoot
+# 这个文件包含了SVN版本控制系统应该忽略的SnapShoot相关文件和目录
+
+# SnapShoot导出文件（临时数据，不需要版本控制）
+Temp/SnapShoot_Exports/
+Temp/MyCustomExports/
+Temp/Test_SnapShoot_Exports/
+
+# 如果用户自定义了Assets下的导出路径，也忽略这些文件
+Assets/SnapShoot_Exports/
+Assets/Test_SnapShoot_Exports/
+Assets/MyCustomExports/
+
+# SnapShoot导出的XML文件（按文件名模式）
+Hierarchy_*.xml
+Scene_*.xml
+Specific_*.xml
+Batch_*.xml
+ByIndex_*.xml
+DontDestroyOnLoad_*.xml
+
+# 使用说明：
+# 1. 将此文件重命名为 .svnignore 并放置在项目根目录
+# 2. 或者使用 svn:ignore 属性设置这些规则：
+#    svn propset svn:ignore -F .svnignore .
+# 3. 提交属性更改：
+#    svn commit -m "Add SnapShoot ignore rules"

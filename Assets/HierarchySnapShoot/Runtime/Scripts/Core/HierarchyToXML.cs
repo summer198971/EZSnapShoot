@@ -36,7 +36,7 @@ namespace EzGame.SnapShoot
     {
         public static StringWriter GetDontDestroyOnLoadHierarchyToStr()
         {
-            XmlDocument xml = GetCurrentSceneHierarchyToXML();
+            XmlDocument xml = GetDontDestroyOnLoadHierarchyToXML();
             StringWriter sw = new StringWriter();
             xml.Save(sw);
             return sw;
@@ -90,21 +90,21 @@ namespace EzGame.SnapShoot
                 throw;
             }
         }
-        public static XmlDocument GetCurrentSceneHierarchyToXML()
+        public static XmlDocument GetCurrentSceneLoadedHierarchyToXML()
         {
-            return GetCurrentSceneHierarchyToXML(ExportOptions.Default);
+            return GetCurrentSceneLoadedHierarchyToXML(ExportOptions.Default);
         }
         
         /// <summary>
-        /// 获取当前场景层级结构的XML文档（带配置选项）
+        /// 获取当前已加载场景的层级结构的XML文档（包括所有已加载场景和DontDestroyOnLoad对象）
         /// </summary>
         /// <param name="options">导出配置选项</param>
-        /// <returns>包含场景层级结构的XML文档</returns>
-        public static XmlDocument GetCurrentSceneHierarchyToXML(ExportOptions options)
+        /// <returns>包含所有已加载场景层级结构的XML文档</returns>
+        public static XmlDocument GetCurrentSceneLoadedHierarchyToXML(ExportOptions options)
         {
             try
             {
-                Debug.Log("[EzGame.SnapShoot] " + "开始导出当前场景层级结构");
+                Debug.Log("[EzGame.SnapShoot] " + "开始导出当前已加载场景的层级结构");
                 
                 // 创建XmlDocument对象
                 XmlDocument xmlDoc = new XmlDocument();
@@ -181,14 +181,173 @@ namespace EzGame.SnapShoot
                     AppendGameObject(dontDestroyElement, rootObject, xmlDoc, options, 0);
                 }
 
-                Debug.Log("[EzGame.SnapShoot] " + "场景层级结构导出完成");
+                Debug.Log("[EzGame.SnapShoot] " + "已加载场景的层级结构导出完成");
                 return xmlDoc;
             }
             catch (System.Exception ex)
             {
-                Debug.LogError("[EzGame.SnapShoot] " + $"导出场景层级结构时发生错误: {ex.Message}");
+                Debug.LogError("[EzGame.SnapShoot] " + $"导出已加载场景的层级结构时发生错误: {ex.Message}");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// 获取指定场景的层级结构的XML文档
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        /// <returns>包含指定场景层级结构的XML文档，如果场景未找到则返回null</returns>
+        public static XmlDocument GetSpecificSceneHierarchyToXML(string sceneName)
+        {
+            return GetSpecificSceneHierarchyToXML(sceneName, ExportOptions.Default);
+        }
+        
+        /// <summary>
+        /// 获取指定场景的层级结构的XML文档（带配置选项）
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        /// <param name="options">导出配置选项</param>
+        /// <returns>包含指定场景层级结构的XML文档，如果场景未找到则返回null</returns>
+        public static XmlDocument GetSpecificSceneHierarchyToXML(string sceneName, ExportOptions options)
+        {
+            try
+            {
+                Debug.Log("[EzGame.SnapShoot] " + $"开始导出指定场景 '{sceneName}' 的层级结构");
+                
+                // 查找指定场景
+                Scene targetScene = default;
+                bool sceneFound = false;
+                
+                // 检查是否是DontDestroyOnLoad场景
+                if (sceneName == "DontDestroyOnLoad")
+                {
+                    return GetDontDestroyOnLoadHierarchyToXML(options);
+                }
+                
+                // 在所有已加载的场景中查找
+                int sceneCount = SceneManager.sceneCount;
+                for (int i = 0; i < sceneCount; i++)
+                {
+                    Scene scene = SceneManager.GetSceneAt(i);
+                    if (scene.name == sceneName && scene.isLoaded)
+                    {
+                        targetScene = scene;
+                        sceneFound = true;
+                        break;
+                    }
+                }
+                
+                if (!sceneFound)
+                {
+                    Debug.LogWarning("[EzGame.SnapShoot] " + $"未找到已加载的场景: '{sceneName}'");
+                    return null;
+                }
+                
+                // 创建XmlDocument对象
+                XmlDocument xmlDoc = new XmlDocument();
+
+                // 创建根元素
+                XmlElement root = xmlDoc.CreateElement("Hierarchy");
+                root.SetAttribute("exportTime", System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                root.SetAttribute("unityVersion", Application.unityVersion);
+                root.SetAttribute("targetScene", sceneName);
+                xmlDoc.AppendChild(root);
+
+                // 创建场景元素
+                XmlElement sceneElement = xmlDoc.CreateElement("Scene");
+                sceneElement.SetAttribute("name", targetScene.name);
+                sceneElement.SetAttribute("active", (targetScene == SceneManager.GetActiveScene()).ToString());
+                sceneElement.SetAttribute("path", targetScene.path);
+                root.AppendChild(sceneElement);
+                
+                // 获取场景的所有根对象
+                GameObject[] rootObjects = targetScene.GetRootGameObjects();
+                Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 包含 {rootObjects.Length} 个根对象");
+
+                // 遍历每个根对象
+                foreach (GameObject rootObject in rootObjects)
+                {
+                    AppendGameObject(sceneElement, rootObject, xmlDoc, options, 0);
+                }
+
+                Debug.Log("[EzGame.SnapShoot] " + $"场景 '{sceneName}' 的层级结构导出完成");
+                return xmlDoc;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("[EzGame.SnapShoot] " + $"导出场景 '{sceneName}' 的层级结构时发生错误: {ex.Message}");
+                throw;
+            }
+        }
+        
+        /// <summary>
+        /// 获取指定场景的层级结构的XML文档（通过场景索引）
+        /// </summary>
+        /// <param name="sceneIndex">场景在SceneManager中的索引</param>
+        /// <returns>包含指定场景层级结构的XML文档，如果索引无效则返回null</returns>
+        public static XmlDocument GetSpecificSceneHierarchyToXML(int sceneIndex)
+        {
+            return GetSpecificSceneHierarchyToXML(sceneIndex, ExportOptions.Default);
+        }
+        
+        /// <summary>
+        /// 获取指定场景的层级结构的XML文档（通过场景索引，带配置选项）
+        /// </summary>
+        /// <param name="sceneIndex">场景在SceneManager中的索引</param>
+        /// <param name="options">导出配置选项</param>
+        /// <returns>包含指定场景层级结构的XML文档，如果索引无效则返回null</returns>
+        public static XmlDocument GetSpecificSceneHierarchyToXML(int sceneIndex, ExportOptions options)
+        {
+            try
+            {
+                if (sceneIndex < 0 || sceneIndex >= SceneManager.sceneCount)
+                {
+                    Debug.LogWarning("[EzGame.SnapShoot] " + $"场景索引 {sceneIndex} 无效，当前已加载场景数量: {SceneManager.sceneCount}");
+                    return null;
+                }
+                
+                Scene targetScene = SceneManager.GetSceneAt(sceneIndex);
+                if (!targetScene.isLoaded)
+                {
+                    Debug.LogWarning("[EzGame.SnapShoot] " + $"索引 {sceneIndex} 对应的场景 '{targetScene.name}' 未加载");
+                    return null;
+                }
+                
+                return GetSpecificSceneHierarchyToXML(targetScene.name, options);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("[EzGame.SnapShoot] " + $"通过索引 {sceneIndex} 导出场景层级结构时发生错误: {ex.Message}");
+                throw;
+            }
+        }
+        
+        /// <summary>
+        /// 获取所有已加载场景的名称列表
+        /// </summary>
+        /// <returns>已加载场景名称的数组，包括DontDestroyOnLoad</returns>
+        public static string[] GetLoadedSceneNames()
+        {
+            var sceneNames = new System.Collections.Generic.List<string>();
+            
+            // 添加所有已加载的场景
+            int sceneCount = SceneManager.sceneCount;
+            for (int i = 0; i < sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (scene.isLoaded)
+                {
+                    sceneNames.Add(scene.name);
+                }
+            }
+            
+            // 检查是否有DontDestroyOnLoad对象
+            GameObject[] dontDestroyObjects = getDontDestroyOnLoadGameObjects();
+            if (dontDestroyObjects.Length > 0)
+            {
+                sceneNames.Add("DontDestroyOnLoad");
+            }
+            
+            return sceneNames.ToArray();
         }
 
         private static GameObject[] getDontDestroyOnLoadGameObjects()
