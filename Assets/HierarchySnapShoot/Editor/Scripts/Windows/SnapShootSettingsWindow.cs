@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using EzGame.Shared;
-using EzGame.Shared.Editor;
 
 namespace EzGame.SnapShoot.Editor
 {
@@ -104,7 +102,7 @@ namespace EzGame.SnapShoot.Editor
             EditorPrefs.SetBool(PREF_AUTO_TIMESTAMP, _autoTimestamp);
             EditorPrefs.SetBool(PREF_INCLUDE_INACTIVE, _includeInactive);
             
-            PluginLogger.Log("SnapShoot", "设置保存成功");
+            Debug.Log("[EzGame.SnapShoot] 设置保存成功");
         }
         
         private void ResetToDefault()

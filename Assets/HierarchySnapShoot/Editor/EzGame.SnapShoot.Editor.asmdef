@@ -2,9 +2,7 @@
     "name": "EzGame.SnapShoot.Editor",
     "rootNamespace": "EzGame.SnapShoot.Editor",
     "references": [
-        "EzGame.SnapShoot.Runtime",
-        "EzGame.Shared.Runtime",
-        "EzGame.Shared.Editor"
+        "EzGame.SnapShoot.Runtime"
     ],
     "includePlatforms": [
         "Editor"

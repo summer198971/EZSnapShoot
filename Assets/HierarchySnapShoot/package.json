@@ -20,9 +20,7 @@
     "url": "https://ezgame.com"
   },
   "license": "MIT",
-  "dependencies": {
-    "com.ezgame.shared": "1.0.0"
-  },
+  "dependencies": {},
   "samples": [
     {
       "displayName": "Basic Usage",

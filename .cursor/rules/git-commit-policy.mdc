@@ -1,0 +1,71 @@
+---
+alwaysApply: true
+description: Git提交策略和规范
+---
+
+# Git提交策略
+
+## 自动提交限制
+
+**重要原则：除非用户明确要求，否则绝对不要自动执行Git提交操作。**
+
+### 禁止的自动操作
+- `git add .` 或 `git add <files>`
+- `git commit -m "message"`
+- `git push`
+- `git merge`
+- `git rebase`
+
+### 允许的Git查询操作
+- `git status` - 查看工作区状态
+- `git log` - 查看提交历史
+- `git diff` - 查看文件差异
+- `git branch` - 查看分支信息
+
+### 何时可以执行Git提交
+只有在用户明确使用以下关键词时才能执行Git操作：
+- "提交这些更改"
+- "commit these changes"
+- "git提交"
+- "推送到远程仓库"
+- "push to remote"
+- "创建新分支"
+- "切换分支"
+
+### 建议的工作流程
+1. 完成代码更改后，询问用户是否需要提交
+2. 如果用户同意，先显示将要提交的文件列表
+3. 询问用户提交信息
+4. 确认后再执行提交操作
+
+### 提交信息规范
+当需要提交时，使用以下格式：
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+类型包括：
+- `feat`: 新功能
+- `fix`: 修复bug
+- `docs`: 文档更新
+- `style`: 代码格式化
+- `refactor`: 重构
+- `test`: 测试相关
+- `chore`: 构建过程或辅助工具的变动
+
+### 示例
+```bash
+# 好的提交信息
+git commit -m "feat(snapshoot): 添加层级快照导出功能"
+git commit -m "fix(editor): 修复菜单项显示问题"
+git commit -m "docs: 更新README文档"
+
+# 避免的提交信息
+git commit -m "update"
+git commit -m "fix"
+git commit -m "changes"
+```

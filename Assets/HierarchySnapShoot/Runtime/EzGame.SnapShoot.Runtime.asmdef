@@ -1,9 +1,7 @@
 {
     "name": "EzGame.SnapShoot.Runtime",
     "rootNamespace": "EzGame.SnapShoot",
-    "references": [
-        "EzGame.Shared.Runtime"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

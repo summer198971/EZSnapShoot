@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Globalization;
 using System.Text;
-using EzGame.Shared;
 
 
 namespace EzGame.SnapShoot
@@ -56,7 +55,7 @@ namespace EzGame.SnapShoot
         {
             try
             {
-                PluginLogger.Log("SnapShoot", "开始导出DontDestroyOnLoad对象层级结构");
+                Debug.Log("[EzGame.SnapShoot] " + "开始导出DontDestroyOnLoad对象层级结构");
                 
                 // 创建XmlDocument对象
                 XmlDocument xmlDoc = new XmlDocument();
@@ -75,19 +74,19 @@ namespace EzGame.SnapShoot
                 root.AppendChild(sceneElement);
                 
                 GameObject[] DontDestroyOnLoad = getDontDestroyOnLoadGameObjects();
-                PluginLogger.Log("SnapShoot", $"找到 {DontDestroyOnLoad.Length} 个DontDestroyOnLoad对象");
+                Debug.Log("[EzGame.SnapShoot] " + $"找到 {DontDestroyOnLoad.Length} 个DontDestroyOnLoad对象");
                 
                 foreach (GameObject rootObject in DontDestroyOnLoad)
                 {
                     AppendGameObject(sceneElement, rootObject, xmlDoc, options, 0);
                 }
 
-                PluginLogger.Log("SnapShoot", "DontDestroyOnLoad对象层级结构导出完成");
+                Debug.Log("[EzGame.SnapShoot] " + "DontDestroyOnLoad对象层级结构导出完成");
                 return xmlDoc;
             }
             catch (System.Exception ex)
             {
-                PluginLogger.LogError("SnapShoot", $"导出DontDestroyOnLoad对象层级结构时发生错误: {ex.Message}");
+                Debug.LogError("[EzGame.SnapShoot] " + $"导出DontDestroyOnLoad对象层级结构时发生错误: {ex.Message}");
                 throw;
             }
         }
@@ -105,7 +104,7 @@ namespace EzGame.SnapShoot
         {
             try
             {
-                PluginLogger.Log("SnapShoot", "开始导出当前场景层级结构");
+                Debug.Log("[EzGame.SnapShoot] " + "开始导出当前场景层级结构");
                 
                 // 创建XmlDocument对象
                 XmlDocument xmlDoc = new XmlDocument();
@@ -128,7 +127,7 @@ namespace EzGame.SnapShoot
                 
                 // 获取所有根对象
                 GameObject[] rootObjects = activeScene.GetRootGameObjects();
-                PluginLogger.Log("SnapShoot", $"当前场景 '{activeScene.name}' 包含 {rootObjects.Length} 个根对象");
+                Debug.Log("[EzGame.SnapShoot] " + $"当前场景 '{activeScene.name}' 包含 {rootObjects.Length} 个根对象");
 
                 // 遍历每个根对象
                 foreach (GameObject rootObject in rootObjects)
@@ -157,7 +156,7 @@ namespace EzGame.SnapShoot
                         
                         // 获取该场景的所有根对象
                         GameObject[] inactiveSceneRootObjects = scene.GetRootGameObjects();
-                        PluginLogger.Log("SnapShoot", $"非激活场景 '{scene.name}' 包含 {inactiveSceneRootObjects.Length} 个根对象");
+                        Debug.Log("[EzGame.SnapShoot] " + $"非激活场景 '{scene.name}' 包含 {inactiveSceneRootObjects.Length} 个根对象");
                         
                         // 遍历每个根对象
                         foreach (GameObject rootObject in inactiveSceneRootObjects)
@@ -175,19 +174,19 @@ namespace EzGame.SnapShoot
                 root.AppendChild(dontDestroyElement);
                 
                 GameObject[] DontDestroyOnLoad = getDontDestroyOnLoadGameObjects();
-                PluginLogger.Log("SnapShoot", $"DontDestroyOnLoad 包含 {DontDestroyOnLoad.Length} 个对象");
+                Debug.Log("[EzGame.SnapShoot] " + $"DontDestroyOnLoad 包含 {DontDestroyOnLoad.Length} 个对象");
                 
                 foreach (GameObject rootObject in DontDestroyOnLoad)
                 {
                     AppendGameObject(dontDestroyElement, rootObject, xmlDoc, options, 0);
                 }
 
-                PluginLogger.Log("SnapShoot", "场景层级结构导出完成");
+                Debug.Log("[EzGame.SnapShoot] " + "场景层级结构导出完成");
                 return xmlDoc;
             }
             catch (System.Exception ex)
             {
-                PluginLogger.LogError("SnapShoot", $"导出场景层级结构时发生错误: {ex.Message}");
+                Debug.LogError("[EzGame.SnapShoot] " + $"导出场景层级结构时发生错误: {ex.Message}");
                 throw;
             }
         }
@@ -274,7 +273,7 @@ namespace EzGame.SnapShoot
             }
             catch (System.Exception ex)
             {
-                PluginLogger.LogError("SnapShoot", $"处理GameObject '{gameObject.name}' 时发生错误: {ex.Message}");
+                Debug.LogError("[EzGame.SnapShoot] " + $"处理GameObject '{gameObject.name}' 时发生错误: {ex.Message}");
                 
                 // 创建错误节点
                 XmlElement errorElement = xmlDoc.CreateElement("GameObject");
@@ -493,7 +492,7 @@ namespace EzGame.SnapShoot
             }
             catch (System.Exception ex)
             {
-                PluginLogger.LogWarning("SnapShoot", $"获取材质信息时发生错误: {ex.Message}");
+                Debug.LogWarning("[EzGame.SnapShoot] " + $"获取材质信息时发生错误: {ex.Message}");
                 
                 // 添加错误信息节点
                 XmlElement errorElement = xmlDoc.CreateElement("Material");
