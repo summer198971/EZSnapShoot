@@ -1,0 +1,25 @@
+{
+  "name": "com.ezgame.shared",
+  "version": "1.0.0",
+  "displayName": "EzGame Shared Library",
+  "description": "EzGame插件集合的共享代码库，提供通用工具类、扩展方法和公共接口。",
+  "unity": "2021.3",
+  "keywords": [
+    "shared",
+    "library",
+    "utilities",
+    "common",
+    "extensions"
+  ],
+  "category": "Libraries",
+  "author": {
+    "name": "EzGame",
+    "email": "support@ezgame.com",
+    "url": "https://ezgame.com"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "documentationUrl": "https://docs.ezgame.com/shared",
+  "changelogUrl": "https://docs.ezgame.com/shared/changelog",
+  "licensesUrl": "https://docs.ezgame.com/shared/license"
+}

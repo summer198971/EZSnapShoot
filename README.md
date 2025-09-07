@@ -1,83 +1,78 @@
-# EZ SnapShoot
+# EzGame Unity插件集合
 
+这是一个包含多个Unity编辑器插件的项目，每个插件都遵循Unity UPM (Unity Package Manager) 标准，可以独立使用或组合使用。
+
+## 🔧 插件列表
+
+### 1. [HierarchySnapShoot](Assets/HierarchySnapShoot/) - 场景层级快照工具
 Unity场景层级快照工具，支持导出场景层级结构为XML格式。
 
-## 🚀 功能特性
+**主要功能:**
+- 导出当前场景的完整层级结构
+- 支持DontDestroyOnLoad对象导出
+- 详细的GameObject信息记录（Transform、Component、Material等）
+- 编辑器菜单集成和设置面板
 
-- **场景层级导出**: 一键导出当前场景的完整层级结构
-- **DontDestroyOnLoad支持**: 专门处理持久化对象的导出
-- **详细信息记录**: 记录GameObject的Transform、Component等详细信息
-- **材质信息**: 包含Renderer组件的材质和Shader信息
-- **编辑器集成**: 通过Unity菜单栏轻松访问功能
-- **设置面板**: 可自定义导出路径和其他选项
-- **完整测试**: 包含Runtime和Editor测试覆盖
+**安装:** `https://github.com/summer198971/EZSnapShoot.git?path=Assets/HierarchySnapShoot`
+
+---
+
+### 2. [即将推出] AssetManager - 资源管理工具
+Unity项目资源管理和优化工具。
+
+**计划功能:**
+- 资源依赖分析
+- 未使用资源检测
+- 资源重复检查
+- 批量资源处理
+
+---
+
+### 3. [即将推出] SceneTools - 场景工具集
+Unity场景编辑和管理工具集合。
+
+**计划功能:**
+- 场景快速切换
+- 场景对比工具
+- 批量场景处理
+- 场景统计分析
+
+---
 
 ## 📦 安装方式
 
-### 通过Unity Package Manager安装
+### 方式一：通过Unity Package Manager安装单个插件
 
 1. 打开Unity编辑器
 2. 打开Window > Package Manager
 3. 点击左上角的"+"按钮
 4. 选择"Add package from git URL"
-5. 输入：`https://github.com/summer198971/EZSnapShoot.git`
+5. 输入对应插件的Git URL（见上方插件列表）
 
-### 手动安装
+### 方式二：克隆整个项目
 
-1. 下载或克隆此仓库
-2. 将`Assets/HierarchySnapShoot`文件夹复制到你的Unity项目的Assets目录下
-
-## 🎯 使用方法
-
-### 通过编辑器菜单
-
-1. **导出当前场景**: `EzGame/SnapShoot/Export Current Scene Hierarchy`
-2. **导出DontDestroyOnLoad对象**: `EzGame/SnapShoot/Export DontDestroyOnLoad Hierarchy`
-3. **打开导出文件夹**: `EzGame/SnapShoot/Open Export Folder`
-4. **设置配置**: `EzGame/SnapShoot/Settings`
-
-### 通过代码调用
-
-```csharp
-using EzGame.SnapShoot;
-using System.Xml;
-
-// 获取当前场景层级的XML文档
-XmlDocument sceneXml = HierarchyToXML.GetCurrentSceneHierarchyToXML();
-
-// 获取DontDestroyOnLoad对象的XML文档
-XmlDocument dontDestroyXml = HierarchyToXML.GetDontDestroyOnLoadHierarchyToXML();
-
-// 获取字符串格式的层级信息
-var stringWriter = HierarchyToXML.GetDontDestroyOnLoadHierarchyToStr();
-string xmlString = stringWriter.ToString();
+```bash
+git clone https://github.com/summer198971/EZSnapShoot.git
 ```
 
-## 📋 XML输出格式
+然后将需要的插件文件夹复制到你的Unity项目中。
 
-导出的XML包含以下信息：
+### 方式三：安装所有插件
 
-```xml
-<Hierarchy>
-  <Scene name="SampleScene" active="true">
-    <GameObject name="Main Camera" active="true" ChildCount="0">
-      <Position x="0" y="1" z="-10" />
-      <Rotation x="0" y="0" z="0" />
-      <Scale x="1" y="1" z="1" />
-      <Components scriptCount="0">
-        <Renderer type="UnityEngine.Camera">
-          <Materials>
-            <Material name="Default-Material" shader="Standard" path="Default-Material" />
-          </Materials>
-        </Renderer>
-        <Component type="UnityEngine.AudioListener" enabled="True" />
-      </Components>
-    </GameObject>
-  </Scene>
-  <Scene name="DontDestroyOnLoad" active="true">
-    <!-- DontDestroyOnLoad对象 -->
-  </Scene>
-</Hierarchy>
+输入主仓库URL：`https://github.com/summer198971/EZSnapShoot.git`
+
+## 🏗️ 项目架构
+
+```
+EZSnapShoot/
+├── Assets/
+│   ├── HierarchySnapShoot/          # 场景层级快照插件
+│   ├── Shared/                      # 共享代码库（计划中）
+│   └── Scenes/                      # 示例场景
+├── Packages/                        # UPM包输出目录（构建时生成）
+├── Build/                           # 构建脚本和配置（计划中）
+├── README.md                        # 项目总览（本文件）
+└── LICENSE                          # MIT许可证
 ```
 
 ## 🛠️ 系统要求
@@ -85,53 +80,59 @@ string xmlString = stringWriter.ToString();
 - Unity 2021.3 或更高版本
 - .NET Standard 2.1
 
-## 📁 项目结构
+## 🧪 测试
 
-```
-HierarchySnapShoot/
-├── Runtime/                          # 运行时代码
-│   ├── Scripts/Core/
-│   │   └── HierarchyToXML.cs        # 核心功能类
-│   └── EzGame.SnapShoot.Runtime.asmdef
-├── Editor/                           # 编辑器代码
-│   ├── Scripts/
-│   │   ├── MenuItems/               # 菜单项
-│   │   └── Windows/                 # 编辑器窗口
-│   └── EzGame.SnapShoot.Editor.asmdef
-├── Tests/                            # 测试代码
-│   ├── Runtime/                     # 运行时测试
-│   └── Editor/                      # 编辑器测试
-├── Samples~/                         # 示例代码
-│   └── BasicUsage/
-├── Documentation~/                   # 文档
-├── package.json                      # UPM包配置
-└── CHANGELOG.md                      # 版本更新日志
-```
-
-## 🧪 运行测试
+每个插件都包含完整的测试覆盖：
 
 1. 打开Unity Test Runner窗口：`Window > General > Test Runner`
 2. 选择PlayMode或EditMode标签页
 3. 点击"Run All"运行所有测试
 
-## 📝 示例
+## 📚 文档
 
-查看`Samples~/BasicUsage`目录下的示例代码和文档，了解如何在你的项目中使用EZ SnapShoot。
+每个插件都有独立的文档：
+- 查看各插件目录下的README.md文件
+- 查看Samples~/目录下的示例代码
+- 查看Documentation~/目录下的详细文档
 
-## 🤝 贡献
+## 🤝 贡献指南
 
-欢迎提交Issue和Pull Request来帮助改进这个项目！
+我们欢迎社区贡献！请遵循以下步骤：
+
+1. Fork本项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建Pull Request
+
+### 开发规范
+
+- 遵循[Unity UPM插件开发规范](.cursor/rules/unity-ump-development.mdc)
+- 每个插件必须包含完整的测试
+- 代码必须通过所有测试
+- 提交信息使用中文，格式清晰
 
 ## 📄 许可证
 
-MIT License - 详见[LICENSE](LICENSE)文件
+本项目采用MIT许可证 - 详见[LICENSE](LICENSE)文件
 
 ## 📞 联系方式
 
-- 作者: EzGame
-- 邮箱: support@ezgame.com
-- 项目主页: https://github.com/summer198971/EZSnapShoot
+- **作者**: EzGame
+- **邮箱**: support@ezgame.com
+- **项目主页**: https://github.com/summer198971/EZSnapShoot
+- **问题反馈**: [GitHub Issues](https://github.com/summer198971/EZSnapShoot/issues)
 
-## 🔄 更新日志
+## 🔄 版本历史
 
-查看[CHANGELOG.md](Assets/HierarchySnapShoot/CHANGELOG.md)了解版本更新详情。
+- **v1.0.0** - 初始版本，包含HierarchySnapShoot插件
+- 更多版本信息请查看各插件的CHANGELOG.md文件
+
+## 🎯 路线图
+
+- [ ] 完善HierarchySnapShoot插件功能
+- [ ] 添加AssetManager资源管理插件
+- [ ] 添加SceneTools场景工具插件
+- [ ] 创建Shared共享代码库
+- [ ] 添加自动化构建和发布流程
+- [ ] 完善文档和示例

@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using EzGame.SnapShoot;
+using EzGame.Shared;
+using EzGame.Shared.Editor;
 
 namespace EzGame.SnapShoot.Editor
 {
@@ -20,11 +22,11 @@ namespace EzGame.SnapShoot.Editor
                 string fileName = $"Hierarchy_{sceneName}_{System.DateTime.Now:yyyyMMdd_HHmmss}.xml";
                 
                 SaveXmlToFile(xmlDoc, fileName);
-                Debug.Log($"[EzGame.SnapShoot] 场景层级已导出: {fileName}");
+                PluginLogger.Log("SnapShoot", $"场景层级已导出: {fileName}");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[EzGame.SnapShoot] 导出场景层级失败: {e.Message}");
+                PluginLogger.LogError("SnapShoot", $"导出场景层级失败: {e.Message}");
             }
         }
         
@@ -37,11 +39,11 @@ namespace EzGame.SnapShoot.Editor
                 string fileName = $"Hierarchy_DontDestroyOnLoad_{System.DateTime.Now:yyyyMMdd_HHmmss}.xml";
                 
                 SaveXmlToFile(xmlDoc, fileName);
-                Debug.Log($"[EzGame.SnapShoot] DontDestroyOnLoad层级已导出: {fileName}");
+                PluginLogger.Log("SnapShoot", $"DontDestroyOnLoad层级已导出: {fileName}");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[EzGame.SnapShoot] 导出DontDestroyOnLoad层级失败: {e.Message}");
+                PluginLogger.LogError("SnapShoot", $"导出DontDestroyOnLoad层级失败: {e.Message}");
             }
         }
         
